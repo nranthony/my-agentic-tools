@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Development environment setup script for my-agentic-tools.
+Assumes conda/mamba environment is already created and activated.
 """
 import os
 import subprocess
@@ -40,49 +41,36 @@ def check_python_version():
     print(f"✓ Python {version.major}.{version.minor}.{version.micro}")
 
 
-def create_virtual_environment():
-    """Create a virtual environment if it doesn't exist."""
-    venv_path = Path(".venv")
-    if not venv_path.exists():
-        print("Creating virtual environment...")
-        run_command(f"{sys.executable} -m venv .venv")
-        print("✓ Virtual environment created")
-    else:
-        print("✓ Virtual environment already exists")
+def check_conda_environment():
+    """Check if conda environment is activated."""
+    conda_env = os.environ.get('CONDA_DEFAULT_ENV')
+    if not conda_env or conda_env == 'base':
+        print("Warning: No conda environment activated or using base environment")
+        print("Please run: conda activate mygentic")
+        print("If environment doesn't exist, run: mamba env create -f environment.yml")
+        sys.exit(1)
+    print(f"✓ Conda environment '{conda_env}' is active")
 
 
-def install_base_dependencies():
-    """Install the main project with core dependencies."""
-    print("Installing base project with core dependencies...")
-    run_command("pip install -e .")
-    print("✓ Base dependencies installed")
+def install_project_in_dev_mode():
+    """Install the mygentic package in development mode."""
+    print("Installing mygentic package in development mode...")
+    run_command("pip install -e .", cwd="mygentic")
+    print("✓ MyGentic package installed in development mode")
 
 
-def install_project_dependencies():
-    """Install each project's dependencies."""
-    projects = [
-        "web-scraping",
-        "document-generation", 
-        "langgraph-agents",
-        "crewai-workflows",
-        "mcp-tools",
-        "api-integrations",
-        "shared"
-    ]
-    
-    for project in projects:
-        project_path = Path(project)
-        if project_path.exists():
-            print(f"Installing {project}...")
-            run_command("pip install -e .", cwd=project_path)
-            print(f"✓ {project} installed")
-
-
-def install_development_tools():
-    """Install development and testing tools."""
-    print("Installing development tools...")
-    run_command("pip install -e .[dev]")
-    print("✓ Development tools installed")
+def verify_conda_packages():
+    """Verify that conda packages are properly installed."""
+    print("Verifying conda package installation...")
+    try:
+        import pydantic
+        import loguru
+        import typer
+        import rich
+        print("✓ Core packages verified")
+    except ImportError as e:
+        print(f"Warning: Some packages missing: {e}")
+        print("Run: mamba env update -f environment.yml --prune")
 
 
 def create_env_file():
@@ -158,9 +146,8 @@ def print_next_steps():
     print("🎉 Setup completed successfully!")
     print("="*50)
     print("\nNext steps:")
-    print("1. Activate the virtual environment:")
-    print("   source .venv/bin/activate  # Linux/Mac")
-    print("   .venv\\Scripts\\activate     # Windows")
+    print("1. Make sure conda environment is activated:")
+    print("   conda activate mygentic")
     print("\n2. Edit the .env file and add your API keys")
     print("\n3. Run a quick test:")
     print("   python scripts/env_checker.py")
@@ -176,10 +163,9 @@ def main():
     print("="*50)
     
     check_python_version()
-    create_virtual_environment()
-    install_base_dependencies() 
-    install_project_dependencies()
-    install_development_tools()
+    check_conda_environment()
+    install_project_in_dev_mode()
+    verify_conda_packages()
     create_env_file()
     setup_git_hooks()
     print_next_steps()

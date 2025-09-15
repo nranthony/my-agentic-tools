@@ -1,0 +1,91 @@
+name: mygentic
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Python version
+  - python=3.11
+
+  # Core shared dependencies (always active)
+  - pydantic>=2.5.0
+  - python-dotenv>=1.0.0
+  - loguru>=0.7.0
+  - typer>=0.9.0
+  - rich>=13.7.0
+  - pyyaml>=6.0.0
+  - requests>=2.31.0
+  - httpx>=0.25.0
+  - click>=8.1.0
+
+  # Development dependencies (always active)
+  - pytest>=7.4.0
+  - pytest-cov>=4.1.0
+  - pytest-asyncio>=0.21.0
+  - black>=23.0.0
+  - isort>=5.12.0
+  - flake8>=6.0.0
+  - mypy>=1.5.0
+  - jupyter>=1.0.0
+
+  # Web scraping tools (ACTIVE - currently used)
+  - beautifulsoup4>=4.12.0
+  - selenium>=4.15.0
+  - lxml>=4.9.0
+  - scrapy>=2.11.0
+  - playwright>=1.40.0
+
+  # Pip-only dependencies (active)
+  - pip
+  - pip:
+    - pydantic-settings>=2.0.0
+    - firecrawl-py>=0.0.1
+    - google-genai>=0.1.0
+
+  # =============================================================================
+  # COMMENTED OUT DEPENDENCIES - Uncomment sections as needed for development
+  # =============================================================================
+
+  # # Document generation tools (INACTIVE - stubs only)
+  # - jinja2>=3.1.0
+  # - reportlab>=4.0.0
+  # - pypdf>=3.17.0
+  # - markdown>=3.5.0
+  # - weasyprint>=60.0
+  # - python-docx>=1.1.0
+  # # - pip:
+  # #   - pdfkit>=1.0.0
+  # #   - latex>=0.7.0
+
+  # # LangGraph agents (INACTIVE - stubs only)
+  # # - pip:
+  # #   - langgraph>=0.1.0
+  # #   - langchain>=0.1.0
+  # #   - langchain-openai>=0.1.0
+  # #   - langchain-anthropic>=0.1.0
+  # #   - langchain-community>=0.0.1
+  # #   - langsmith>=0.1.0
+  # #   - tavily-python>=0.3.0
+
+  # # CrewAI workflows (INACTIVE - stubs only, requires Python 3.10+)
+  # # - pip:
+  # #   - crewai>=0.28.0
+  # #   - crewai-tools>=0.4.0
+
+  # # MCP tools (INACTIVE - stubs only)
+  # - websockets>=12.0
+  # - anyio>=4.0.0
+  # # - pip:
+  # #   - mcp>=1.0.0
+
+  # # API integrations (INACTIVE - stubs only)
+  # - aiohttp>=3.9.0
+  # - tenacity>=8.2.0
+  # # - pip:
+  # #   - openai>=1.0.0
+  # #   - anthropic>=0.3.0
+  # #   - responses>=0.24.0
+
+# Optional variables for conda environment
+variables:
+  CONDA_DEFAULT_ENV: mygentic

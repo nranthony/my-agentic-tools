@@ -7,9 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Environment Setup and Validation
 
 ```bash
+mamba env create -f environment.yml  # Create conda environment from specification
+conda activate mygentic               # Activate conda environment
 python dev_setup.py                  # Complete development environment setup
 python scripts/env_checker.py        # Validate setup, packages, and API connections
-source .venv/bin/activate            # Activate virtual environment (Linux/Mac)
 ```
 
 ### Code Quality and Linting
@@ -32,9 +33,11 @@ python -m pytest --cov-report=html         # Generate HTML coverage report
 ### Installation Options
 
 ```bash
-cd mygentic && pip install -e .[all]                    # Install all functionality
-cd mygentic && pip install -e .[web-scraping]          # Install specific modules
-cd mygentic && pip install -e .[web-scraping,api-integrations]  # Multiple modules
+# After activating conda environment:
+cd mygentic && pip install -e .      # Install mygentic package in development mode
+
+# To add more dependencies, edit environment.yml and update:
+mamba env update -f environment.yml --prune
 ```
 
 ## Architecture Overview
@@ -45,7 +48,7 @@ This repository contains the **MyGentic package** - a unified toolkit for agenti
 
 1. **Single Package**: All functionality is contained within the `mygentic/` package with clear submodule organization
 2. **Shared Foundation**: Common utilities, base classes, and infrastructure in `mygentic.shared`
-3. **Modular Installation**: Install only the components you need via optional dependencies
+3. **Conda/Mamba Management**: Dependencies managed via environment.yml with modular sections
 
 ### Package Structure
 
@@ -129,7 +132,7 @@ from web_scraping.firecrawl_client import FirecrawlClient
 - **Per-project tests**: Each project has its own `tests/` directory
 - **Shared test utilities**: Common fixtures and mocks in `shared.testing`
 - **Integration tests**: Cross-project functionality testing
-- **Configuration**: Unified pytest config in root `pyproject.toml`
+- **Configuration**: Unified pytest config in `mygentic/pyproject.toml`
 
 ## Key Environment Variables
 
