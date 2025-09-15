@@ -30,7 +30,9 @@ cd mcp-tools && pip install -e .
 ## MCP Servers
 
 ### File System Server
+
 Provides secure file system access:
+
 ```python
 from mcp_tools.servers.filesystem_server import FileSystemServer
 
@@ -38,8 +40,10 @@ server = FileSystemServer(allowed_paths=["/safe/directory"])
 server.start()
 ```
 
-### API Gateway Server  
+### API Gateway Server
+
 Proxies API calls with rate limiting:
+
 ```python
 from mcp_tools.servers.api_gateway_server import APIGatewayServer
 

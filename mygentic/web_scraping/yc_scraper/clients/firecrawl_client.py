@@ -115,7 +115,7 @@ class FirecrawlClient:
         for attempt in range(self.max_retries):
             try:
                 # Prepare scrape options
-                options = {
+                kwargs = {
                     "formats": ["markdown", "html"],
                     "timeout": self.timeout * 1000,  # Convert to milliseconds
                 }
@@ -124,22 +124,49 @@ class FirecrawlClient:
                 if cookies:
                     # Convert cookies dict to cookie string format
                     cookie_string = "; ".join([f"{k}={v}" for k, v in cookies.items()])
-                    options["headers"] = {"Cookie": cookie_string}
+                    kwargs["headers"] = {"Cookie": cookie_string}
                 
                 # Add actions if provided
                 if actions:
-                    options["actions"] = actions
+                    kwargs["actions"] = actions
                 
                 # Perform scrape
-                result = self.app.scrape_url(url, options)
+                result = self.app.scrape(url, **kwargs)
                 
-                if result and result.get("success", False):
+                # Handle new Firecrawl API v2 response format
+                if hasattr(result, 'data') and hasattr(result, 'success'):
+                    # v2 API returns a Document object
+                    if result.success:
+                        logger.info(f"Successfully scraped {url}")
+                        return {
+                            "success": True,
+                            "markdown": getattr(result.data, 'markdown', ''),
+                            "html": getattr(result.data, 'html', ''),
+                            "metadata": getattr(result.data, 'metadata', {}),
+                        }
+                    else:
+                        error_msg = getattr(result, 'error', 'Unknown error')
+                        logger.warning(f"Scrape attempt {attempt + 1} failed: {error_msg}")
+                        last_error = Exception(f"Firecrawl scrape failed: {error_msg}")
+                elif result and hasattr(result, '__dict__'):
+                    # Fallback: treat as object with attributes
                     logger.info(f"Successfully scraped {url}")
-                    return result
+                    result_dict = result.__dict__
+                    return {
+                        "success": True,
+                        "markdown": result_dict.get('markdown', ''),
+                        "html": result_dict.get('html', ''),
+                        "metadata": result_dict.get('metadata', {}),
+                    }
                 else:
-                    error_msg = result.get("error", "Unknown error") if result else "No result returned"
-                    logger.warning(f"Scrape attempt {attempt + 1} failed: {error_msg}")
-                    last_error = Exception(f"Firecrawl scrape failed: {error_msg}")
+                    # Legacy v1 API format or error
+                    if result and result.get("success", False):
+                        logger.info(f"Successfully scraped {url}")
+                        return result
+                    else:
+                        error_msg = result.get("error", "Unknown error") if result else "No result returned"
+                        logger.warning(f"Scrape attempt {attempt + 1} failed: {error_msg}")
+                        last_error = Exception(f"Firecrawl scrape failed: {error_msg}")
                     
             except Exception as e:
                 logger.warning(f"Scrape attempt {attempt + 1} failed with exception: {str(e)}")

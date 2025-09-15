@@ -5,14 +5,14 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 
 # Import modules to test
-from yc_scraper.models.search_params import SearchParams, Role, JobType, SortBy
-from yc_scraper.models.company import Company
-from yc_scraper.models.job import Job
-from yc_scraper.core.url_builder import URLBuilder
-from yc_scraper.core.auth_handler import AuthHandler
-from yc_scraper.utils.data_cleaner import DataCleaner
-from yc_scraper.extractors.company_extractor import CompanyExtractor
-from yc_scraper.extractors.job_extractor import JobExtractor
+from mygentic.web_scraping.yc_scraper.models.search_params import SearchParams, Role, JobType, SortBy
+from mygentic.web_scraping.yc_scraper.models.company import Company
+from mygentic.web_scraping.yc_scraper.models.job import Job
+from mygentic.web_scraping.yc_scraper.core.url_builder import URLBuilder
+from mygentic.web_scraping.yc_scraper.core.auth_handler import AuthHandler
+from mygentic.web_scraping.yc_scraper.utils.data_cleaner import DataCleaner
+from mygentic.web_scraping.yc_scraper.extractors.company_extractor import CompanyExtractor
+from mygentic.web_scraping.yc_scraper.extractors.job_extractor import JobExtractor
 
 
 class TestSearchParams:

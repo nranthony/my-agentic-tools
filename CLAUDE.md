@@ -5,13 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Environment Setup and Validation
+
 ```bash
-python setup.py                      # Complete development environment setup
+python dev_setup.py                  # Complete development environment setup
 python scripts/env_checker.py        # Validate setup, packages, and API connections
 source .venv/bin/activate            # Activate virtual environment (Linux/Mac)
 ```
 
 ### Code Quality and Linting
+
 ```bash
 python scripts/lint_and_format.py          # Format and lint all code
 python scripts/lint_and_format.py --check  # Check code quality without changes
@@ -19,44 +21,67 @@ python scripts/lint_and_format.py --skip-mypy  # Skip type checking
 ```
 
 ### Testing
+
 ```bash
 python -m pytest                           # Run all tests
-python -m pytest web-scraping/tests/       # Test specific project
+python -m pytest mygentic/web_scraping/tests/  # Test specific module
 python -m pytest -k "test_specific"        # Run specific test
 python -m pytest --cov-report=html         # Generate HTML coverage report
 ```
 
 ### Installation Options
+
 ```bash
-pip install -e .[all]                      # Install all projects
-pip install -e .[web-scraping,langgraph-agents]  # Install specific projects
-cd web-scraping && pip install -e .        # Install individual project
+cd mygentic && pip install -e .[all]                    # Install all functionality
+cd mygentic && pip install -e .[web-scraping]          # Install specific modules
+cd mygentic && pip install -e .[web-scraping,api-integrations]  # Multiple modules
 ```
 
 ## Architecture Overview
 
-This repository implements a **multi-project architecture** designed for working with agentic AI systems. Each domain is isolated but shares common infrastructure.
+This repository contains the **MyGentic package** - a unified toolkit for agentic AI systems with all functionality consolidated into a single Python package.
 
 ### Core Architecture Principles
 
-1. **Domain Separation**: Each project folder (`web-scraping/`, `langgraph-agents/`, etc.) is self-contained with its own dependencies and concerns
-2. **Shared Foundation**: The `shared/` project provides common utilities, base classes, and infrastructure used across all projects
-3. **Flexible Installation**: Projects can be installed independently or together via optional dependencies in the root `pyproject.toml`
+1. **Single Package**: All functionality is contained within the `mygentic/` package with clear submodule organization
+2. **Shared Foundation**: Common utilities, base classes, and infrastructure in `mygentic.shared`
+3. **Modular Installation**: Install only the components you need via optional dependencies
 
-### Project Domains
+### Package Structure
 
-- **`web-scraping/`**: Firecrawl, BeautifulSoup, Selenium tools for content extraction
-- **`document-generation/`**: LaTeX, PDF, and multi-format document creation
-- **`langgraph-agents/`**: LangGraph-based state management and agent workflows  
-- **`crewai-workflows/`**: Multi-agent collaboration using CrewAI framework
-- **`mcp-tools/`**: Model Context Protocol servers and client implementations
-- **`api-integrations/`**: Unified wrappers for OpenAI, Anthropic, Google, and other APIs
-- **`shared/`**: Common utilities, base classes, logging, config, and testing infrastructure
+```text
+mygentic/
+├── web_scraping/        # Web scraping tools (Firecrawl, BeautifulSoup, Selenium)
+├── document_generation/ # LaTeX, PDF, and multi-format document creation
+├── langgraph_agents/    # LangGraph-based state management and agent workflows
+├── crewai_workflows/    # Multi-agent collaboration using CrewAI framework
+├── mcp_tools/          # Model Context Protocol servers and client implementations
+├── api_integrations/   # Unified wrappers for OpenAI, Anthropic, Google, and other APIs
+└── shared/             # Common utilities, base classes, logging, config, and testing
+```
+
+### Usage Examples
+
+```python
+# Import from the main package
+from mygentic.web_scraping import YCJobScraper, Company, Job
+from mygentic.shared import BaseAgent, get_logger
+
+# Or import submodules
+import mygentic.web_scraping as web
+import mygentic.api_integrations as api
+
+# Use the tools
+scraper = YCJobScraper()
+companies, jobs = scraper.scrape_search()
+```
 
 ### Key Architectural Patterns
 
 #### Base Class Inheritance
+
 All agents inherit from `shared.base.agent.BaseAgent`:
+
 ```python
 from shared.base.agent import BaseAgent
 
@@ -66,19 +91,25 @@ class CustomAgent(BaseAgent):
 ```
 
 #### Configuration Management
+
 Centralized config via `shared.config.Settings`:
+
 - Loads from `.env` files and environment variables
 - Pydantic validation and type safety
 - Shared across all projects
 
 #### Logging Infrastructure  
+
 Structured logging via `shared.logging.get_logger()`:
+
 - Rich formatting with context
 - Consistent across all projects
 - Configurable levels and outputs
 
 #### API Client Pattern
+
 All API integrations follow `api_integrations.base.BaseAPIClient`:
+
 - Retry logic with exponential backoff
 - Rate limiting and quota management
 - Consistent error handling
@@ -86,6 +117,7 @@ All API integrations follow `api_integrations.base.BaseAPIClient`:
 ### Cross-Project Dependencies
 
 Projects can import from each other using absolute imports:
+
 ```python
 from shared.models import TaskRequest, TaskResponse
 from api_integrations.openai_client import OpenAIClient
@@ -102,6 +134,7 @@ from web_scraping.firecrawl_client import FirecrawlClient
 ## Key Environment Variables
 
 Essential configuration (create `.env` file):
+
 ```bash
 # Core AI APIs (required for most functionality)
 OPENAI_API_KEY=your_key_here
@@ -145,42 +178,67 @@ This section serves as a lightweight project management system using Markdown. K
 **Completed:** Finished tasks. Move from In Progress.
 
 #### Completed
-* [x] Y Combinator Job Board Scraper - Complete modular architecture with Firecrawl + Gemini AI
-* [x] Infinite scroll pagination handling for dynamic content loading
-* [x] Cookie-based authentication for premium YC content access
-* [x] Structured data extraction with Pydantic models (Company, Job, SearchParams)
-* [x] Multi-format export (JSON, CSV) with automatic deduplication and cleaning
-* [x] Comprehensive test suite and documentation
+
+- [x] Y Combinator Job Board Scraper - Complete modular architecture with Firecrawl + Gemini AI
+- [x] Infinite scroll pagination handling for dynamic content loading
+- [x] Cookie-based authentication for premium YC content access
+- [x] Structured data extraction with Pydantic models (Company, Job, SearchParams)
+- [x] Multi-format export (JSON, CSV) with automatic deduplication and cleaning
+- [x] Comprehensive test suite and documentation
+- [x] **Complete Package Refactor** - Unified mygentic package with single source of truth
+- [x] Consolidated all 8 separate pyproject.toml files into one unified configuration
+- [x] Created proper Python package structure with __init__.py files for clean imports
+- [x] Updated all import statements throughout codebase to use mygentic namespace
+- [x] Migrated from multi-project to single-package architecture
 
 #### In Progress
-* [ ] 
+
+- [ ]  
 
 #### To Do
-* [ ] Test YCJobScraper() with real API keys and validate data extraction
-* [ ] Create daily auto-trigger system for automated job scraping
-* [ ] Plan output integration - Google Sheets, Database, Notion, Streamlit webapp? 
+
+- [ ] Test YCJobScraper() with real API keys and validate data extraction
+- [ ] Create daily auto-trigger system for automated job scraping
+- [ ] Plan output integration - Google Sheets, Database, Notion, Streamlit webapp?
+- [ ] Implement shared utilities (BaseAgent, Settings, get_logger) in mygentic.shared
+- [ ] Create API integration clients in mygentic.api_integrations
 
 ### 🔵 Project Log
 
 **Daily Entries:** Record completed work each day under a `YYYY-MM-DD` heading.  
 **Notes:** Not for future tasks. Just an archive of what's done.
 
+#### 2025-09-12
+
+- [x] **Major Architecture Refactor** - Converted from multi-project to unified mygentic package
+- [x] Created single mygentic/ directory with proper Python package structure
+- [x] Consolidated 8 separate pyproject.toml files into one unified configuration file
+- [x] Implemented proper __init__.py files for all submodules with clean public APIs
+- [x] Updated all import statements to use mygentic.* namespace throughout codebase
+- [x] Migrated project folders to snake_case naming (web_scraping, api_integrations, etc.)
+- [x] Created single source of truth for all dependencies with modular installation options
+- [x] Updated CLAUDE.md documentation to reflect new package architecture
+- [x] Fixed pip installation issues with circular dependencies and package discovery
+
 #### 2025-09-10
-* [x] Built complete Y Combinator Job Board Scraper with modular architecture
-* [x] Implemented Firecrawl client with intelligent infinite scroll handling
-* [x] Created Gemini AI integration for structured data extraction from messy HTML
-* [x] Added cookie-based authentication system for YC premium content access
-* [x] Built comprehensive data models (Company, Job, SearchParams) with Pydantic validation
-* [x] Implemented data cleaning, deduplication, and multi-format export (JSON/CSV)
-* [x] Created complete test suite and documentation with usage examples
-* [x] Set up project structure: 13 modules across core/, clients/, extractors/, models/, utils/
+
+- [x] Built complete Y Combinator Job Board Scraper with modular architecture
+- [x] Implemented Firecrawl client with intelligent infinite scroll handling
+- [x] Created Gemini AI integration for structured data extraction from messy HTML
+- [x] Added cookie-based authentication system for YC premium content access
+- [x] Built comprehensive data models (Company, Job, SearchParams) with Pydantic validation
+- [x] Implemented data cleaning, deduplication, and multi-format export (JSON/CSV)
+- [x] Created complete test suite and documentation with usage examples
+- [x] Set up project structure: 13 modules across core/, clients/, extractors/, models/, utils/
 
 #### 2025-09-09
-* [x] Added project tracking system to CLAUDE.md
-* [x] Integrated feature development workflow tracking
-* [x] Established project log structure
+
+- [x] Added project tracking system to CLAUDE.md
+- [x] Integrated feature development workflow tracking
+- [x] Established project log structure
 
 ### Usage Tips
+
 - Move tasks between sections as they progress
 - Date your daily entries for easy reference
 - Keep the Project Log as a record, don't delete old entries

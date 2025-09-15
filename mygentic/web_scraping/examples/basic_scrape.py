@@ -17,11 +17,9 @@ import os
 import sys
 from pathlib import Path
 
-# Add the parent directory to the path to import yc_scraper
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from yc_scraper import YCJobScraper, SearchParams
-from yc_scraper.models.search_params import JobType, Role, SortBy
+# Import from the mygentic package
+from mygentic.web_scraping import YCJobScraper, SearchParams
+from mygentic.web_scraping.yc_scraper.models.search_params import JobType, Role, SortBy
 import logging
 
 # Set up logging
