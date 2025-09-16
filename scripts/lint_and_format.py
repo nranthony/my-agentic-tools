@@ -36,18 +36,18 @@ def run_command(command: List[str], check_only: bool = False) -> bool:
 def get_python_files() -> List[str]:
     """Get list of Python files to process."""
     python_dirs = [
-        "web-scraping",
-        "document-generation", 
-        "langgraph-agents",
-        "crewai-workflows",
-        "mcp-tools",
-        "api-integrations",
-        "shared",
+        "mygentic/web_scraping",
+        "mygentic/document_generation", 
+        "mygentic/langgraph_agents",
+        "mygentic/crewai_workflows",
+        "mygentic/mcp_tools",
+        "mygentic/api_integrations",
+        "mygentic/shared",
         "scripts",
         "notebooks"
     ]
     
-    files = ["setup.py"]
+    files = ["dev_setup.py"]
     
     for dir_name in python_dirs:
         dir_path = Path(dir_name)
@@ -85,13 +85,13 @@ def run_flake8(files: List[str]) -> bool:
 def run_mypy() -> bool:
     """Run mypy type checker."""
     python_dirs = [
-        "web-scraping",
-        "document-generation",
-        "langgraph-agents", 
-        "crewai-workflows",
-        "mcp-tools",
-        "api-integrations",
-        "shared"
+        "mygentic/web_scraping",
+        "mygentic/document_generation",
+        "mygentic/langgraph_agents", 
+        "mygentic/crewai_workflows",
+        "mygentic/mcp_tools",
+        "mygentic/api_integrations",
+        "mygentic/shared"
     ]
     
     success = True
