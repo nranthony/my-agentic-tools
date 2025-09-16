@@ -2,247 +2,99 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Environment Setup
+
+This project uses conda for environment management with automatic pip installation. The setup script handles the complete environment creation and project installation:
+
+```bash
+# Complete setup (creates conda env + installs project)
+./setup_conda_env.sh
+
+# Update existing environment (preserves env, uses --prune)
+./setup_conda_env.sh --update
+
+# Manual activation if needed
+conda activate mygentic
+```
+
+The script:
+
+- Creates conda environment from `environment.yml` (Python 3.12)
+- Automatically installs the project in development mode via `pip install -e ./mygentic`
+- Uses `pyproject.toml` for package configuration
+
+## Core Architecture
+
+**MyGentic** is a modular agentic AI toolkit organized into specialized domains:
+
+- `mygentic/web_scraping/` - Web scraping tools, primarily YC job board scraper
+- `mygentic/api_integrations/` - External API clients and integrations
+- `mygentic/crewai_workflows/` - CrewAI-based multi-agent workflows
+- `mygentic/langgraph_agents/` - LangGraph-based agent implementations
+- `mygentic/document_generation/` - Document creation and formatting
+- `mygentic/mcp_tools/` - MCP (Model Control Protocol) tools
+- `mygentic/shared/` - Common utilities, logging, and configuration
+
+### Key Components
+
+**Web Scraping Architecture** (primary focus):
+
+- `YCJobScraper` in `mygentic/web_scraping/yc_scraper/core/scraper.py` - Main orchestrator
+- Uses Firecrawl for web scraping and Gemini for content extraction
+- Modular extractors: `CompanyExtractor`, `JobExtractor`, `PaginationHandler`
+- Data models: `Company`, `Job`, `SearchParams` with Pydantic validation
+- Authentication via `AuthHandler` with session cookies
+
+**Shared Infrastructure**:
+
+- Centralized logging via loguru in `mygentic/shared/logging/logger.py`
+- Configuration management in `mygentic/shared/config/settings.py` with pydantic-settings
+- Base agent classes in `mygentic/shared/base/`
+
 ## Development Commands
-
-### Environment Setup and Validation
-
-```bash
-mamba env create -f environment.yml  # Create conda environment from specification
-conda activate mygentic               # Activate conda environment
-python dev_setup.py                  # Complete development environment setup
-python scripts/env_checker.py        # Validate setup, packages, and API connections
-```
-
-### Code Quality and Linting
-
-```bash
-python scripts/lint_and_format.py          # Format and lint all code
-python scripts/lint_and_format.py --check  # Check code quality without changes
-python scripts/lint_and_format.py --skip-mypy  # Skip type checking
-```
 
 ### Testing
 
 ```bash
-python -m pytest                           # Run all tests
-python -m pytest mygentic/web_scraping/tests/  # Test specific module
-python -m pytest -k "test_specific"        # Run specific test
-python -m pytest --cov-report=html         # Generate HTML coverage report
+# Run tests with pytest
+python -m pytest mygentic/web_scraping/tests/ -v
+
+# Run individual test files
+python test_scraper.py
+python test_firecrawl_access.py
+python test_gemini_extraction.py
 ```
 
-### Installation Options
+### Environment Variables
+
+Set required API keys in `.env`:
 
 ```bash
-# After activating conda environment:
-cd mygentic && pip install -e .      # Install mygentic package in development mode
-
-# To add more dependencies, edit environment.yml and update:
-mamba env update -f environment.yml --prune
+FIRECRAWL_API_KEY=your_key
+GEMINI_API_KEY=your_key
+YC_SESSION_COOKIE=your_cookie
 ```
 
-## Architecture Overview
+### Package Installation
 
-This repository contains the **MyGentic package** - a unified toolkit for agentic AI systems with all functionality consolidated into a single Python package.
-
-### Core Architecture Principles
-
-1. **Single Package**: All functionality is contained within the `mygentic/` package with clear submodule organization
-2. **Shared Foundation**: Common utilities, base classes, and infrastructure in `mygentic.shared`
-3. **Conda/Mamba Management**: Dependencies managed via environment.yml with modular sections
-
-### Package Structure
-
-```text
-mygentic/
-├── web_scraping/        # Web scraping tools (Firecrawl, BeautifulSoup, Selenium)
-├── document_generation/ # LaTeX, PDF, and multi-format document creation
-├── langgraph_agents/    # LangGraph-based state management and agent workflows
-├── crewai_workflows/    # Multi-agent collaboration using CrewAI framework
-├── mcp_tools/          # Model Context Protocol servers and client implementations
-├── api_integrations/   # Unified wrappers for OpenAI, Anthropic, Google, and other APIs
-└── shared/             # Common utilities, base classes, logging, config, and testing
-```
-
-### Usage Examples
-
-```python
-# Import from the main package
-from mygentic.web_scraping import YCJobScraper, Company, Job
-from mygentic.shared import BaseAgent, get_logger
-
-# Or import submodules
-import mygentic.web_scraping as web
-import mygentic.api_integrations as api
-
-# Use the tools
-scraper = YCJobScraper()
-companies, jobs = scraper.scrape_search()
-```
-
-### Key Architectural Patterns
-
-#### Base Class Inheritance
-
-All agents inherit from `shared.base.agent.BaseAgent`:
-
-```python
-from shared.base.agent import BaseAgent
-
-class CustomAgent(BaseAgent):
-    async def execute(self, task: str) -> str:
-        # Implementation follows common interface
-```
-
-#### Configuration Management
-
-Centralized config via `shared.config.Settings`:
-
-- Loads from `.env` files and environment variables
-- Pydantic validation and type safety
-- Shared across all projects
-
-#### Logging Infrastructure  
-
-Structured logging via `shared.logging.get_logger()`:
-
-- Rich formatting with context
-- Consistent across all projects
-- Configurable levels and outputs
-
-#### API Client Pattern
-
-All API integrations follow `api_integrations.base.BaseAPIClient`:
-
-- Retry logic with exponential backoff
-- Rate limiting and quota management
-- Consistent error handling
-
-### Cross-Project Dependencies
-
-Projects can import from each other using absolute imports:
-
-```python
-from shared.models import TaskRequest, TaskResponse
-from api_integrations.openai_client import OpenAIClient
-from web_scraping.firecrawl_client import FirecrawlClient
-```
-
-### Testing Architecture
-
-- **Per-project tests**: Each project has its own `tests/` directory
-- **Shared test utilities**: Common fixtures and mocks in `shared.testing`
-- **Integration tests**: Cross-project functionality testing
-- **Configuration**: Unified pytest config in `mygentic/pyproject.toml`
-
-## Key Environment Variables
-
-Essential configuration (create `.env` file):
+The project uses pyproject.toml and is auto-installed by the setup script:
 
 ```bash
-# Core AI APIs (required for most functionality)
-OPENAI_API_KEY=your_key_here
-ANTHROPIC_API_KEY=your_key_here
-
-# LangChain/LangSmith (for agent workflows)
-LANGSMITH_API_KEY=your_key_here
-LANGSMITH_TRACING=true
-
-# Web scraping
-FIRECRAWL_API_KEY=your_key_here
-
-# Search and data
-TAVILY_API_KEY=your_key_here
-NEWS_API_KEY=your_key_here
+# Manual installation if needed
+pip install -e .
 ```
 
-## Development Workflow
+## Important Patterns
 
-1. **New Features**: Determine appropriate project domain, create in that folder
-2. **Cross-project Utilities**: Add to `shared/` if used by multiple projects
-3. **API Integrations**: Add new clients to `api-integrations/`
-4. **Code Quality**: Always run `python scripts/lint_and_format.py` before commits
-5. **Testing**: Add tests in relevant `tests/` directory, run full suite
+- **Always use loguru for logging** - Import from `mygentic.shared.logging.logger`
+- **Environment-based configuration** - Use `mygentic.shared.config.settings` for API keys and settings
+- **Pydantic models** - All data structures use Pydantic for validation and serialization
+- **Modular extractors** - Web scraping uses specialized extractor classes for different data types
+- **Client abstractions** - External services wrapped in dedicated client classes
 
-## Project-Specific Notes
+## Project Structure Notes
 
-- **Document Generation**: Requires LaTeX installation for PDF compilation
-- **Web Scraping**: May need ChromeDriver/GeckoDriver for Selenium
-- **CrewAI**: Requires Python 3.10+ (higher than project minimum)
-- **Jupyter Notebooks**: Located in `notebooks/` with sample data in `notebooks/data/`
-
-## Project Tracking
-
-This section serves as a lightweight project management system using Markdown. Keep it updated to track your progress and maintain a record of completed work.
-
-### 🟢 Feature Development
-
-**To Do:** Backlog. Add new tasks here.  
-**In Progress:** Tasks you are currently working on. Move from To Do.  
-**Completed:** Finished tasks. Move from In Progress.
-
-#### Completed
-
-- [x] Y Combinator Job Board Scraper - Complete modular architecture with Firecrawl + Gemini AI
-- [x] Infinite scroll pagination handling for dynamic content loading
-- [x] Cookie-based authentication for premium YC content access
-- [x] Structured data extraction with Pydantic models (Company, Job, SearchParams)
-- [x] Multi-format export (JSON, CSV) with automatic deduplication and cleaning
-- [x] Comprehensive test suite and documentation
-- [x] **Complete Package Refactor** - Unified mygentic package with single source of truth
-- [x] Consolidated all 8 separate pyproject.toml files into one unified configuration
-- [x] Created proper Python package structure with __init__.py files for clean imports
-- [x] Updated all import statements throughout codebase to use mygentic namespace
-- [x] Migrated from multi-project to single-package architecture
-
-#### In Progress
-
-- [ ]  
-
-#### To Do
-
-- [ ] Test YCJobScraper() with real API keys and validate data extraction
-- [ ] Create daily auto-trigger system for automated job scraping
-- [ ] Plan output integration - Google Sheets, Database, Notion, Streamlit webapp?
-- [ ] Implement shared utilities (BaseAgent, Settings, get_logger) in mygentic.shared
-- [ ] Create API integration clients in mygentic.api_integrations
-
-### 🔵 Project Log
-
-**Daily Entries:** Record completed work each day under a `YYYY-MM-DD` heading.  
-**Notes:** Not for future tasks. Just an archive of what's done.
-
-#### 2025-09-12
-
-- [x] **Major Architecture Refactor** - Converted from multi-project to unified mygentic package
-- [x] Created single mygentic/ directory with proper Python package structure
-- [x] Consolidated 8 separate pyproject.toml files into one unified configuration file
-- [x] Implemented proper __init__.py files for all submodules with clean public APIs
-- [x] Updated all import statements to use mygentic.* namespace throughout codebase
-- [x] Migrated project folders to snake_case naming (web_scraping, api_integrations, etc.)
-- [x] Created single source of truth for all dependencies with modular installation options
-- [x] Updated CLAUDE.md documentation to reflect new package architecture
-- [x] Fixed pip installation issues with circular dependencies and package discovery
-
-#### 2025-09-10
-
-- [x] Built complete Y Combinator Job Board Scraper with modular architecture
-- [x] Implemented Firecrawl client with intelligent infinite scroll handling
-- [x] Created Gemini AI integration for structured data extraction from messy HTML
-- [x] Added cookie-based authentication system for YC premium content access
-- [x] Built comprehensive data models (Company, Job, SearchParams) with Pydantic validation
-- [x] Implemented data cleaning, deduplication, and multi-format export (JSON/CSV)
-- [x] Created complete test suite and documentation with usage examples
-- [x] Set up project structure: 13 modules across core/, clients/, extractors/, models/, utils/
-
-#### 2025-09-09
-
-- [x] Added project tracking system to CLAUDE.md
-- [x] Integrated feature development workflow tracking
-- [x] Established project log structure
-
-### Usage Tips
-
-- Move tasks between sections as they progress
-- Date your daily entries for easy reference
-- Keep the Project Log as a record, don't delete old entries
-- Use checkboxes `[ ]` for pending tasks and `[x]` for completed ones
+- Each domain has its own README with specific documentation
+- Examples and notebooks in `mygentic/web_scraping/examples/` and `notebooks/`
+- Test files follow `test_*.py` naming convention
+- Uses conda for dependencies (environment.yml) and pip for project installation (pyproject.toml)
